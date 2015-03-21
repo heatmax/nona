@@ -1,0 +1,103 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Параметры исходящих вызовов">
+         <EditTextPreference
+			android:key="@string/defaultDelayAutoCall"
+            android:title="Интервал между вызовами"
+            android:defaultValue="9"
+            android:dialogTitle="Введите интервал (сек.)"/>
+		<EditTextPreference
+            android:key="@string/defaultCallTime"
+            android:title="Длительность вызова"
+            android:defaultValue="9"
+            android:dialogTitle="Введите длительность вызова(сек.)"/>	
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Параметры входящих вызовов">
+		<CheckBoxPreference
+			android:key="@string/isAutoAnswer"
+			android:defaultValue="true"		
+			android:summaryOn="выключить"
+			android:summaryOff="включить"
+			android:title="Автоответчик">
+		</CheckBoxPreference>
+		<CheckBoxPreference
+			android:key="@string/isAutoConference"
+			android:defaultValue="true"		
+			android:summaryOn="выключить"
+			android:summaryOff="включить"
+			android:title="Автоконференция">
+		</CheckBoxPreference>		
+		<EditTextPreference
+            android:key="@string/defaultDelayAutoAnswer"
+            android:title="Задержка перед автоподъемом"
+            android:defaultValue="0"
+            android:dialogTitle="Введите задержку (сек.)"/>
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Настройка номеров">			
+		<ListPreference
+			android:entries="@array/methodNumberGeneration"
+			android:entryValues="@array/methodNumberGeneration_values"
+			android:defaultValue="1"		
+			android:key="@string/methodList"
+			android:summary="Выберите из списка"
+			android:title="Источник номеров">
+		</ListPreference>
+		<PreferenceScreen
+			android:key="manualNumber"
+			android:dependency="@string/methodList"
+			android:summary="Настройки ручного ввода номеров телефона"
+			android:title="Редактировать ручной ввод">
+			<CheckBoxPreference
+				android:key="@string/isRandomManualNumber"
+				android:summary="Использовать номера  случайном порядке"
+				android:title="Случайно">
+			</CheckBoxPreference>
+			<CheckBoxPreference
+				android:key="@string/isRepeatManualNumber"
+				android:defaultValue="true"		
+				android:summary="Использовать номера повторно"
+				android:title="Повтрять">
+			</CheckBoxPreference>
+			<EditTextPreference
+				android:key="@string/defaultPrefix"
+				android:title="Номера дозвона"
+				android:summary="Ввод номеров дозвона через Enter"
+				android:defaultValue="@string/defaultPrefix"
+				android:dialogTitle="Введите номера либо маски (Например 111, +38067ххххххх)"/>	
+		</PreferenceScreen>		
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Удаленный доступ">
+		<CheckBoxPreference
+			android:key="@string/isXmppUseConnect"
+			android:defaultValue="true"		
+			android:summary="Включить удаленное управление"
+			android:title="Использовать">
+		</CheckBoxPreference>
+		<EditTextPreference
+			android:key="@string/xmppLogin"
+			android:title="Логин"
+			android:summary="Введите Ваш логин"
+			android:defaultValue="@string/xmppLogin"
+			android:dialogTitle="Введите логин без @ и сервера"/>	
+		<EditTextPreference
+			android:key="@string/xmppPass"
+			android:title="Пароль"
+			android:summary="Введите Ваш пароль"
+			android:defaultValue="@string/xmppPass"
+			android:dialogTitle="Введите пароль"/>	
+		<EditTextPreference
+			android:key="@string/xmppPort"
+			android:title="Порт"
+			android:summary="Введите порт"
+			android:defaultValue="@string/xmppPort"
+			android:dialogTitle="Введите номер порта"/>	
+		<EditTextPreference
+			android:key="@string/xmppServer"
+			android:title="Сервер"
+			android:summary="Введите адрес сервера"
+			android:defaultValue="@string/xmppServer"
+			android:dialogTitle="Введите адрес сервера"/>	
+	</PreferenceCategory>
+	
+ 
+</PreferenceScreen>

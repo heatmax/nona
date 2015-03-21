@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">MORO</string>
+	<string name="infoAutoCallOn">Остановить</string>
+	<string name="infoAutoCallOff">Запустить</string>
+	<string name="infoAutoAnswerOn">Автоприем выкл.</string>	
+	<string name="infoAutoAnswerOff">Автоприем вкл.</string>	
+	<string name="defaultPrefix">+38067xxxxxxx</string>
+	<string name="defaultDelayAutoCall">15</string>
+	<string name="defaultCallTime">9</string>
+ 	<string name="defaultDelayAutoAnswer">0</string>
+	<string name="methodList">methodList</string>
+	<string name="isRandomManualNumber">randomManualNumber</string>
+	<string name="isRepeatManualNumber">repeatManualNumber</string>	
+	<string name="isAutoAnswer">isAutoAnswer</string>	
+	<string name="isAutoCall">isAutoCall</string>		
+	<string name="isAutoEndCall">isAutoCall</string>		
+	<string name="isAutoConference">isAutoConference</string>			
+	<string name="xmppLogin">frauder_cl1</string>
+    <string name="xmppPass">mainkey7</string>
+    <string name="xmppPort">5222</string>
+    <string name="xmppServer">jabber.ru</string>
+	<string name="isXmppUseConnect">isXmppUseConnect</string>
+	
+</resources>
+

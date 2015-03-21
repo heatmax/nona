@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.heatclub.moro"
+    android:versionCode="1"
+    android:versionName="1.0" >
+    <uses-sdk 
+        android:minSdkVersion="8" 
+        android:targetSdkVersion="11" />
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <activity
+            android:label="@string/app_name"
+            android:name=".MainActivity"
+			android:screenOrientation="portrait" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+		<activity 
+            android:name=".prefCallActivity" 
+            android:label="@string/app_name">
+        </activity>	
+		<activity 
+            android:name=".prefSmsActivity" 
+            android:label="@string/app_name">
+        </activity>	
+		
+		<service 
+            android:enabled="true" 
+            android:name=".telephony.CallService">
+			<intent-filter >
+				<action android:name="com.heatclub.moro.action.CONNECT" />
+                <action android:name="com.heatclub.moro.action.SEND" />
+				<action android:name="com.heatclub.moro.action.CALL" />
+				<action android:name="com.heatclub.moro.action.END_CALL" />
+				<action android:name="com.heatclub.moro.action.CONFIG" />		
+				<data android:scheme="ussd"></data>
+				<data android:scheme="tel"></data>		
+				<data android:scheme="reply"></data>
+				<category android:name="android.intent.category.DEFAULT" />
+          	</intent-filter>
+        </service>
+		<service 
+            android:enabled="true" 
+            android:name=".xmpp.XMPPService">
+			<intent-filter >
+				<action android:name="com.heatclub.moro.action.CONNECT" />
+				<action android:name="com.heatclub.moro.action.DISCONNECT" />		
+				<data android:scheme="xmpp"></data>
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+        </service>	
+        <receiver 
+            android:name=".telephony.CallReceiver">
+            <intent-filter>
+              	<action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+			</intent-filter>
+        </receiver>  
+		
+		<service
+            android:name="com.codedemigod.services.CDUSSDService"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.ussd.IExtendedNetworkService" />
+				<category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.codedemigod.receivers.CDBootCompleteRcv" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+				<action android:name="com.heatclub.moro.action.BOOT" />
+				<category android:name="android.intent.category.DEFAULT" />			
+            </intent-filter>
+        </receiver>
+		
+		
+    </application>
+	<uses-permission android:name="android.permission.CALL_PHONE" />
+	<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" /> 
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.CALL_PRIVILEGED" />
+	<uses-permission android:name="android.permission.READ_LOGS"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+</manifest>
