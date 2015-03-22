@@ -55,6 +55,9 @@ public class CallService extends Service {
 	public static final String PARAM_KEY_AUTOCONFERENCE_OFF = "conferenceoff";
 	public static final String PARAM_KEY_AUTOCONFERENCE_DELAY = "confdelay";
 	
+	//режим работы сервиса смс или звонки 
+	public static final int ID_MODE_CALL = 1;	
+	public static final int ID_MODE_SMS = 2;	
 	
 	private static CallCore call;
 
@@ -163,7 +166,8 @@ public class CallService extends Service {
 				}
 				call.setCallDuration(0);
 				call.setNumber(uri.getHost());
-				call.Call();					
+				call.setMode(ID_MODE_CALL);				
+				call.run();
 				ActionManager.sendReply(getBaseContext(), "Дозвон на номер "+uri.getHost()+" запущен");				
 			}			
 			else
@@ -176,7 +180,8 @@ public class CallService extends Service {
 					
 				}
 				commandSet(uri);
-				call.Call();
+				call.setMode(ID_MODE_CALL);
+				call.run();
 				ActionManager.sendReply(getBaseContext(), "Дозвон запущен");				
 				
 			}		
@@ -197,8 +202,8 @@ public class CallService extends Service {
 						ActionManager.sendReply(getBaseContext(), "ОШИБКА : Пустой список номеров");		
 						return;
 					}			
-				
-					call.Call();
+					call.setMode(ID_MODE_CALL);
+					call.run();
 					ActionManager.sendReply(getBaseContext(), "Автодозвон запущен");								
 				}
 			}		
@@ -212,7 +217,8 @@ public class CallService extends Service {
 					return;
 				}			
 				call.autoCallOn();
-				call.Call();	
+				call.setMode(ID_MODE_CALL);
+				call.run();	
 				ActionManager.sendReply(getBaseContext(), "Автодозвон запущен");								
 				
 			}
@@ -259,7 +265,7 @@ public class CallService extends Service {
 		//	отправка глобального ответа		
 			if((uri.getQueryParameter(PARAM_KEY_OK) != null) && this.isAutoCall){
 				call.autoCallOn();
-				call.Call();
+				call.run();
 				ActionManager.sendReply(getBaseContext(), "USSD OK");		
 			}
 				
@@ -280,8 +286,8 @@ public class CallService extends Service {
 			}			
 			
 	//		call.setNumber(uri.getHost());
-	//		call.setSmsText("test sms");
-	//		call.Sms();					
+			call.setMode(ID_MODE_SMS);
+			call.run();					
 			ActionManager.sendReply(getBaseContext(), "Отправка смс на номер "+uri.getHost()+" запущен");				
 			
 		}
@@ -528,8 +534,8 @@ public class CallService extends Service {
 		//Длительность вызова
 		call.setCallDuration(Integer.parseInt(prefs.getString(getString(R.string.defaultCallTime), "13")));
 		//Массив номеров дозвона
-		String nums;
-		String[] anums;
+	//	String nums;
+//		String[] anums;
 		call.setNumber(prefs.getString(getString(R.string.defaultPrefix), "").split("\n"));
 		
 		//test 1
@@ -590,15 +596,19 @@ public class CallService extends Service {
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);	
 		//Получить данные из настроек пользователя
-		//Время задержки между вызовами
-		call.setAutoCallDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoCall), "9")));
-		//Длительность вызова
-		call.setCallDuration(Integer.parseInt(prefs.getString(getString(R.string.defaultCallTime), "13")));
+		//Время задержки между отправками смс
+/*		call.setAutoSmsDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoSms), "60")));
+		//Количество смс в одной отправке
+		call.setSmsCount(Integer.parseInt(prefs.getString(getString(R.string.defaultCountSms), "13")));
+		//Установить текст смс
+		call.setSmsText("test sms");
 		//Массив номеров дозвона
-		String nums;
-		String[] anums;
-		call.setNumber(prefs.getString(getString(R.string.defaultPrefix), "").split("\n"));
-
+	//	String nums;
+	//	String[] anums;
+		call.setSmsNumber(prefs.getString(getString(R.string.defaultSmsPrefix), "").split("\n"));
+		//anums;
+	//	anums = call.getNumberArray();
+	//	anums.getClass().;
 		//test 1
 		/*		nums = getString(R.string.defaultPrefix);
 		 //test 2
@@ -611,20 +621,20 @@ public class CallService extends Service {
 		 call.setNumber(anums);
 		 */
       	//Задержка перед автоподьемом
-		call.setAutoAnswerDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoAnswer), "0")));
-		call.setConferenceDelay(0);
+//		call.setAutoAnswerDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoAnswer), "0")));
+//		call.setConferenceDelay(0);
 		//test 18
-		if (prefs.getBoolean(getString(R.string.isRandomManualNumber), true)) 
+		if (prefs.getBoolean(getString(R.string.isRandomSmsManualNumber), true)) 
 			call.setRandom(true);
 		else
 			call.setRandom(false);
 
-		if(prefs.getBoolean(getString(R.string.isRepeatManualNumber), true)) 
+		if(prefs.getBoolean(getString(R.string.isRepeatSmsManualNumber), true)) 
 			call.setRepeat(true);
 		else
 			call.setRepeat(false);
 		//test 19		
-		if(prefs.getBoolean(getString(R.string.isAutoConference), true)){
+/*		if(prefs.getBoolean(getString(R.string.isAutoConference), true)){
 			call.autoConferenceOn();
 			ActionManager.sendReply(getBaseContext(), "Автоконференция включена");		
 		}
@@ -632,12 +642,13 @@ public class CallService extends Service {
 			call.autoConferenceOff();
 			ActionManager.sendReply(getBaseContext(), "Автоконференция выключена");				
 		}
+		*/
 		//test 20		
 //		if(prefs.getBoolean(getString(R.string.isAutoCall), true))
 //			call.autoCallOn();
 //		else
 //			call.autoCallOff();
-
+/*
 		if(prefs.getBoolean(getString(R.string.isAutoAnswer), true)){
 			call.autoAnswerOn();
 			ActionManager.sendReply(getBaseContext(), "Автоприем входящего вызова включен");		
@@ -647,8 +658,8 @@ public class CallService extends Service {
 			ActionManager.sendReply(getBaseContext(), "Автоприем входящего вызова выключен");		
 
 		}
-
-		ActionManager.sendReply(getBaseContext(), "Настройки телефонии загружены");		
+*/
+		ActionManager.sendReply(getBaseContext(), "Настройки СМС рассылки загружены");		
 
 
 	}
