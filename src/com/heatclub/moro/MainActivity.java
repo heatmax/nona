@@ -50,6 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 	private static final int ID_ACTION_SERVICE_STOP = 6;
 	private static final int ID_ACTION_SERVICE_START = 7;	
 */	
+	//id элементов главного меню
 	private static final int ID_MENU_PREFCALL = 100; //меню настроек хвонков
 	private static final int ID_MENU_PREFSMS = 101; //меню настроек СМС
 	private static final int ID_MENU_PREF = 102; //меню общих настроек
@@ -57,6 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 	private static final int ID_MENU_AUTOCALL = 104;
 	private static final int ID_MENU_AUTOANSWER = 105;
 	
+	//id источников получения рабочих номеров телефонов
 	private static final int ID_NS_MANUAL = 1;
 	private static final int ID_NS_FILE = 2;
 	private static final int ID_NS_DB = 3;
@@ -64,6 +66,18 @@ public class MainActivity extends Activity implements View.OnClickListener
 	private TextView logView;  //Экран журнала
 	private TextView callView; //Экран звонков
 	private TextView smsView; //Экран Sms
+
+	private TabHost tabs; //закладки главного экрана
+	//id закладок главного экрана
+	private static final int ID_TB_CALL = 0;
+	private static final int ID_TB_LOG = 1;
+	private static final int ID_TB_SMS = 2;
+	
+	//текищий режим программы Звонки или СМС (SMS/CALL)
+	private static int currentMode;
+	//id режимов программы
+	private static final int ID_MODE_CALL = 1;
+	private static final int ID_MODE_SMS = 2;
 	
 	private AppProtection protect;
 	
@@ -84,7 +98,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 	private WakeLock wakeLock;
 	// создаем BroadcastReceiver	
 	BroadcastReceiver receiver = new BroadcastReceiver() {
-		// действия при получении сообщений
+		// действия при получении системных сообщений
 		public void onReceive(Context context, Intent intent) {
 			Uri uri = intent.getData();
 			Morom.Action action = Morom.Action.getFromString(intent.getAction());
@@ -112,7 +126,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 		setContentView(R.layout.main);		
 		
 		//Отрисовать закладки
-		TabHost tabs=(TabHost)findViewById(android.R.id.tabhost);       
+		tabs=(TabHost)findViewById(android.R.id.tabhost);       
         tabs.setup();
 
         TabHost.TabSpec spec = tabs.newTabSpec("tag1");
@@ -131,7 +145,7 @@ public class MainActivity extends Activity implements View.OnClickListener
         spec.setIndicator("СМС");
         tabs.addTab(spec);
 
-        tabs.setCurrentTab(1);
+        tabs.setCurrentTab(ID_TB_LOG);
 		
 		//загрузить Views
 		logView = (TextView)findViewById(R.id.logView);
@@ -148,9 +162,10 @@ public class MainActivity extends Activity implements View.OnClickListener
 		// регистрируем (включаем) BroadcastReceiver
 		registerReceiver(receiver, iniFilter);
 		
+		//Инициализируем приложение
 		init();
 		
-		//отключаем режим блокировки
+		//отключаем режим блокировки экрана
 		PowerManager powerManager =
 			(PowerManager)getSystemService(Context.POWER_SERVICE);
 		wakeLock =
@@ -317,43 +332,40 @@ public class MainActivity extends Activity implements View.OnClickListener
 		}
 	}
 	
+	private void startCall(){
+		if(!isAutoCall){
+			ActionManager.sendCommand(this, 
+									  Morom.Command.CALL, 
+									  Morom.Scheme.TEL.addSlash(),
+									  Morom.Scheme.ACTIVITY);
+			isAutoCall = true;
+			currentMode = ID_MODE_CALL;
+		}
+	}
+	
+	private void startSms(){
+		if(!isAutoCall){
+			ActionManager.sendCommand(this, 
+									  Morom.Command.SEND, 
+									  Morom.Scheme.SMS.addSlash(),
+									  Morom.Scheme.ACTIVITY);
+			isAutoCall = true;
+			currentMode = ID_MODE_SMS;
+		}
+		
+	}
 	
 	//запустить цикл автодозвона
 	private void autoCallStart(){		
 	
 		if(protect.checkActivation(true)) {	
-			if(!isAutoCall){
-				ActionManager.sendCommand(this, 
-										  Morom.Command.CALL, 
-										  Morom.Scheme.TEL.plus(),
-										  Morom.Scheme.ACTIVITY);
-				/*
-				String uri;// tel://num?dur&delay&rep&ran
-				String repeat;
-				String random;
-				if(isRepeatNumber)
-					repeat = "true";
-				else
-					repeat = "false";
-
-				if(isRandomNumber)
-					random = "true";
-				else
-					random = "false";					
-				
-				uri = Morom.Scheme.TEL.plus()+
-				CallService.COMMAND_SET+
-				"?"+CallService.PARAM_KEY_CALL_DURATION+"="+callDuration+
-				"&"+CallService.PARAM_KEY_CALL_DELAY+"="+delay+
-				"&"+CallService.PARAM_KEY_CALL_REPEAT+"="+repeat+
-				"&"+CallService.PARAM_KEY_CALL_RANDOM+"="+random+
-				"&"+CallService.PARAM_KEY_AUTOCALL_ON+"=true";
-					
-				ActionManager.sendCommand(this, Morom.Command.CONFIG, uri, Morom.Scheme.ACTIVITY);
-				ActionManager.sendCommand(this, Morom.Command.CALL, Morom.Scheme.TEL.plus()+number, Morom.Scheme.ACTIVITY);
-				*/			
-			//	addToLog("Дозвон запущен...\n");
-				isAutoCall = true;
+			switch(tabs.getCurrentTab()){
+				case ID_TB_CALL:
+					startCall();
+					break;
+				case ID_TB_SMS:
+					startSms();
+					break;
 			}
 		}
 		else
@@ -366,21 +378,32 @@ public class MainActivity extends Activity implements View.OnClickListener
 	//остановить выполнение цикла автодозвона
 	private void autoCallStop(){
 	//	if(isAutoCall){
-			ActionManager.sendCommand(this, Morom.Command.CALL, 
-					Morom.Scheme.TEL.plus()+
-					"?"+CallService.PARAM_KEY_AUTOCALL_OFF,
-					Morom.Scheme.ACTIVITY);
+		switch(currentMode){
+			case ID_MODE_CALL:
+				ActionManager.sendCommand(this, Morom.Command.CALL, 
+						Morom.Scheme.TEL.addSlash()+
+						"?"+CallService.PARAM_KEY_AUTOCALL_OFF,
+						Morom.Scheme.ACTIVITY);
 			
-	//		addToLog("Дозвон остановлен...\n");
-			isAutoCall = false;
-		
+		//		addToLog("Дозвон остановлен...\n");
+			
+				break;
+				
+			case ID_MODE_SMS:
+				ActionManager.sendCommand(this, Morom.Command.SEND, 
+										  Morom.Scheme.SMS.addSlash()+
+										  "?"+CallService.PARAM_KEY_AUTOSMS_OFF,
+										  Morom.Scheme.ACTIVITY);		
+				break;
+		}
+		isAutoCall = false;
 	}
 	
 	
 	//Включить выполнение автоприема вызова
 	private void autoAnswerStart(){
 		if(!isAutoAnswer){
-			String uri = Morom.Scheme.TEL.plus()+CallService.COMMAND_LOAD;
+			String uri = Morom.Scheme.TEL.addSlash()+CallService.COMMAND_LOAD;
 	/*		String uri = Morom.Scheme.TEL.plus()+
 				CallService.COMMAND_SET+
 				"?"+CallService.PARAM_KEY_AUTOANSWER_DELAY+
@@ -397,7 +420,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 	//остановить работу автоответчика
 	private void autoAnswerStop(){
 		if(isAutoAnswer){
-			String uri = Morom.Scheme.TEL.plus()+CallService.COMMAND_LOAD;
+			String uri = Morom.Scheme.TEL.addSlash()+CallService.COMMAND_LOAD;
 			
 /*			String uri = Morom.Scheme.TEL.plus()+
 				CallService.COMMAND_SET+
@@ -596,7 +619,7 @@ public class MainActivity extends Activity implements View.OnClickListener
                 break;
 			case ID_MENU_PREF:
                 Intent ipref = new Intent();
-        		ipref.setClass(this,prefCallActivity.class);
+        		ipref.setClass(this,prefActivity.class);
                 startActivity(ipref);
                 break;
 				

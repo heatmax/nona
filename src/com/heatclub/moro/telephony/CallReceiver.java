@@ -18,7 +18,7 @@ public class CallReceiver extends BroadcastReceiver{
 	
 				if(phoneArr[0] != '*')			
 				if(phoneArr.length >2){
-					ActionManager.sendCommand(context, Morom.Command.END_CALL, Morom.Scheme.TEL.plus(), Morom.Scheme.TEL);				
+					ActionManager.sendCommand(context, Morom.Command.END_CALL, Morom.Scheme.TEL.addSlash(), Morom.Scheme.TEL);				
 				}
 			}			
 	}

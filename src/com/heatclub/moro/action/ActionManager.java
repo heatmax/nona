@@ -128,7 +128,7 @@ public class ActionManager
 	
 	public static void sendReply(Context context, String msg){
 		String uri;
-		uri = Morom.Scheme.REPLY.plus()+msg;
+		uri = Morom.Scheme.REPLY.addSlash()+msg;
 		context.sendBroadcast(new Intent(Morom.Action.SEND.toString(), Uri.parse(uri)));
 	}
 	

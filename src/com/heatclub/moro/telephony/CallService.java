@@ -44,7 +44,11 @@ public class CallService extends Service {
 	public static final String PARAM_KEY_CALL_RANDOM_ON = "random";
 	public static final String PARAM_KEY_CALL_RANDOM_OFF = "randomoff";	
 	public static final String PARAM_KEY_AUTOCALL_ON = "autocall";
-	public static final String PARAM_KEY_AUTOCALL_OFF = "autocalloff";	
+	public static final String PARAM_KEY_AUTOCALL_OFF = "autocalloff";
+	
+	public static final String PARAM_KEY_AUTOSMS_ON = "autosms";
+	public static final String PARAM_KEY_AUTOSMS_OFF = "autosmsoff";	
+	
 	public static final String PARAM_KEY_AUTOANSWER_ON = "autoanswer";
 	public static final String PARAM_KEY_AUTOANSWER_OFF = "autoansweroff";	
 	public static final String PARAM_KEY_AUTOCONFERENCE_ON = "conference";
@@ -69,7 +73,7 @@ public class CallService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			Morom.Action maction = Morom.Action.getFromString(intent.getAction());
 			Uri uri = intent.getData();
-	//		Toast.makeText(context, 
+		//	Toast.makeText(context, 
 	//					   "TEL: action = "+maction+ "-" + uri.getAuthority(), Toast.LENGTH_LONG).show();
 
 			switch(maction){
@@ -106,6 +110,8 @@ public class CallService extends Service {
 		filter.addDataScheme(Morom.Scheme.TEL.toString());
 		filter.addDataScheme(Morom.Scheme.USSD.toString());
 		filter.addDataScheme(Morom.Scheme.REPLY.toString());
+		filter.addDataScheme(Morom.Scheme.SMS.toString());
+		
 		filter.addCategory("android.intent.category.DEFAULT");
 		// регистрируем (включаем) BroadcastReceiver
 		//test11
@@ -113,7 +119,8 @@ public class CallService extends Service {
 		//test12
 		call = new CallCore(getApplicationContext());
 		//test13
-		readPreference();
+		readCallPreference();
+		readSmsPreference();
 		//test14
 		ActionManager.sendReply(getBaseContext(), "Служба телефонии запущенна");
 		
@@ -157,7 +164,7 @@ public class CallService extends Service {
 				call.setCallDuration(0);
 				call.setNumber(uri.getHost());
 				call.Call();					
-				ActionManager.sendReply(getBaseContext(), "Дозвонн на номер "+uri.getHost()+" запущен");				
+				ActionManager.sendReply(getBaseContext(), "Дозвон на номер "+uri.getHost()+" запущен");				
 			}			
 			else
 			if((!uri.getQueryParameterNames().isEmpty()) &&(uri.getLastPathSegment() == null) && (!uri.getHost().isEmpty())){				
@@ -199,7 +206,7 @@ public class CallService extends Service {
 			else{
 				//если без номера и параметров то запустить
 				//автодозвон с применением сохраненных настроек
-				readPreference();
+				readCallPreference();
 				if(call.getNumberArray().length <= 0){
 					ActionManager.sendReply(getBaseContext(), "ОШИБКА : Пустой список номеров");		
 					return;
@@ -243,19 +250,43 @@ public class CallService extends Service {
 	
 	private void send(Uri uri){
 		if(uri.getScheme().equals(Morom.Scheme.USSD.toString())){
+			//отправка ussd запроса
 			call.sendUssd(uri.getHost());
 			this.isAutoCall = call.isAutoCall();
 			call.autoCallOff();
 		}else
 		if(uri.getScheme().equals(Morom.Scheme.REPLY.toString())){
-		//	ActionManager.sendReply(getBaseContext(), "USSD REPLY");		
+		//	отправка глобального ответа		
 			if((uri.getQueryParameter(PARAM_KEY_OK) != null) && this.isAutoCall){
 				call.autoCallOn();
 				call.Call();
 				ActionManager.sendReply(getBaseContext(), "USSD OK");		
 			}
 				
-		}	
+		}else
+		if(uri.getScheme().equals(Morom.Scheme.SMS.toString())){	
+			//отправка смс
+			if(call.isAutoCall()){
+				call.autoCallOff();
+				ActionManager.sendReply(getBaseContext(), "Автодозвон остановлен");								
+
+			}
+			
+			readSmsPreference();
+			
+			if(call.getNumberArray().length <= 0){
+				ActionManager.sendReply(getBaseContext(), "ОШИБКА : Пустой список номеров");		
+				return;
+			}			
+			
+	//		call.setNumber(uri.getHost());
+	//		call.setSmsText("test sms");
+	//		call.Sms();					
+			ActionManager.sendReply(getBaseContext(), "Отправка смс на номер "+uri.getHost()+" запущен");				
+			
+		}
+		
+		
 	}
 	
 	
@@ -277,20 +308,20 @@ public class CallService extends Service {
 	  if(uri.getScheme().equals(Morom.Scheme.TEL.toString()))
 		try{
 			if(uri.getAuthority().equals(COMMAND_SET)){
-			commandSet(uri);
+				commandSet(uri);
 			}else
 			if(uri.getAuthority().equals(COMMAND_ADD)){
-			commandAdd(uri);
+				commandAdd(uri);
 			}else
 			if(uri.getAuthority().equals(COMMAND_DEL)){
-			commandDel(uri);
+				commandDel(uri);
 			}else
 			if(uri.getAuthority().equals(COMMAND_SAVE)){
-			writePreference();
+				writeCallPreference();
 			//		reply.append("Настройки телефонии сохранены"+EOL);						
 			}else
 			if(uri.getAuthority().equals(COMMAND_LOAD)){
-			readPreference();
+				readCallPreference();
 			//	reply.append("Настройки телефонии загружены"+EOL);						
 			}else	
 			//По умолчанию показать конфигурацию
@@ -467,7 +498,7 @@ public class CallService extends Service {
 		ActionManager.sendCommand(getBaseContext(), Morom.Command.SEND, uri, Morom.Scheme.TEL);
 	}
 */	
-	private void writePreference(){
+	private void writeCallPreference(){
 		SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(this).edit();	
 		//Сохранить данные в настроики пользователя
 		//Время задержки между вызовами
@@ -488,7 +519,7 @@ public class CallService extends Service {
 		
 	}
 	
-	private void readPreference(){
+	private void readCallPreference(){
 	
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);	
 		//Получить данные из настроек пользователя
@@ -554,6 +585,96 @@ public class CallService extends Service {
 	
 		
 	}
+	
+	private void readSmsPreference(){
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);	
+		//Получить данные из настроек пользователя
+		//Время задержки между вызовами
+		call.setAutoCallDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoCall), "9")));
+		//Длительность вызова
+		call.setCallDuration(Integer.parseInt(prefs.getString(getString(R.string.defaultCallTime), "13")));
+		//Массив номеров дозвона
+		String nums;
+		String[] anums;
+		call.setNumber(prefs.getString(getString(R.string.defaultPrefix), "").split("\n"));
+
+		//test 1
+		/*		nums = getString(R.string.defaultPrefix);
+		 //test 2
+		 //	nums = prefs.getString(nums, null);
+		 //test 5
+		 nums = prefs.getString(nums, null);
+		 //test 3
+		 anums = nums.split("\n");
+		 //test 4
+		 call.setNumber(anums);
+		 */
+      	//Задержка перед автоподьемом
+		call.setAutoAnswerDelay(Integer.parseInt(prefs.getString(getString(R.string.defaultDelayAutoAnswer), "0")));
+		call.setConferenceDelay(0);
+		//test 18
+		if (prefs.getBoolean(getString(R.string.isRandomManualNumber), true)) 
+			call.setRandom(true);
+		else
+			call.setRandom(false);
+
+		if(prefs.getBoolean(getString(R.string.isRepeatManualNumber), true)) 
+			call.setRepeat(true);
+		else
+			call.setRepeat(false);
+		//test 19		
+		if(prefs.getBoolean(getString(R.string.isAutoConference), true)){
+			call.autoConferenceOn();
+			ActionManager.sendReply(getBaseContext(), "Автоконференция включена");		
+		}
+		else{
+			call.autoConferenceOff();
+			ActionManager.sendReply(getBaseContext(), "Автоконференция выключена");				
+		}
+		//test 20		
+//		if(prefs.getBoolean(getString(R.string.isAutoCall), true))
+//			call.autoCallOn();
+//		else
+//			call.autoCallOff();
+
+		if(prefs.getBoolean(getString(R.string.isAutoAnswer), true)){
+			call.autoAnswerOn();
+			ActionManager.sendReply(getBaseContext(), "Автоприем входящего вызова включен");		
+		}
+		else{
+			call.autoAnswerOff();	
+			ActionManager.sendReply(getBaseContext(), "Автоприем входящего вызова выключен");		
+
+		}
+
+		ActionManager.sendReply(getBaseContext(), "Настройки телефонии загружены");		
+
+
+	}
+	
+	private void writeSmsPreference(){
+		SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(this).edit();	
+		//Сохранить данные в настроики пользователя
+		//Время задержки между вызовами
+		prefs.putString(getString(R.string.defaultDelayAutoCall), String.valueOf(call.getAutoCallDelay()));
+		//Длительность вызова
+		prefs.putString(getString(R.string.defaultCallTime), String.valueOf(call.getCallDuration()));
+		//Массив номеров дозвона		
+      	prefs.putString(getString(R.string.defaultPrefix), call.getNumberString("\n"));
+  	 	//Задержка перед автоподьемом
+		prefs.putString(getString(R.string.defaultDelayAutoAnswer), String.valueOf(call.getAutoAnswerDelay()));
+		prefs.putBoolean(getString(R.string.isRandomManualNumber), call.isRandom());		
+		prefs.putBoolean(getString(R.string.isRepeatManualNumber), call.isRepeat());
+		prefs.putBoolean(getString(R.string.isAutoConference), call.isAutoConference());
+		prefs.putBoolean(getString(R.string.isAutoAnswer), call.isAutoAnswer());
+		ActionManager.sendReply(getBaseContext(), "Настройки телефонии сохранены");		
+
+		prefs.apply();
+
+	}
+
+	
 /*	
 	private void autoCallStop(){
 		if(uri.getScheme().equals(Morom.Scheme.TEL))			

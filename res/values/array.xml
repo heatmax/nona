@@ -10,6 +10,17 @@
 		<item>2</item>
 		<item>3</item>
 	</string-array>
+	<string-array name="methodSmsNumberGeneration">
+		<item>Ручной</item>
+		<item>Файл</item>
+		<item>БД</item>
+	</string-array>
+	<string-array name="methodSmsNumberGeneration_values">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+	</string-array>
+	
 	
 </resources>
 

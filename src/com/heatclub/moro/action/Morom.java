@@ -23,7 +23,7 @@ public class Morom{
 			return this.val;
 		};
 		
-		public String plus()
+		public String addSlash()
 		{
 			return this.val+slashes;
 		};

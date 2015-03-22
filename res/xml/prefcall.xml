@@ -65,39 +65,5 @@
 				android:defaultValue="@string/defaultPrefix"
 				android:dialogTitle="Введите номера либо маски (Например 111, +38067ххххххх)"/>	
 		</PreferenceScreen>		
-	</PreferenceCategory>
-	<PreferenceCategory android:title="Удаленный доступ">
-		<CheckBoxPreference
-			android:key="@string/isXmppUseConnect"
-			android:defaultValue="true"		
-			android:summary="Включить удаленное управление"
-			android:title="Использовать">
-		</CheckBoxPreference>
-		<EditTextPreference
-			android:key="@string/xmppLogin"
-			android:title="Логин"
-			android:summary="Введите Ваш логин"
-			android:defaultValue="@string/xmppLogin"
-			android:dialogTitle="Введите логин без @ и сервера"/>	
-		<EditTextPreference
-			android:key="@string/xmppPass"
-			android:title="Пароль"
-			android:summary="Введите Ваш пароль"
-			android:defaultValue="@string/xmppPass"
-			android:dialogTitle="Введите пароль"/>	
-		<EditTextPreference
-			android:key="@string/xmppPort"
-			android:title="Порт"
-			android:summary="Введите порт"
-			android:defaultValue="@string/xmppPort"
-			android:dialogTitle="Введите номер порта"/>	
-		<EditTextPreference
-			android:key="@string/xmppServer"
-			android:title="Сервер"
-			android:summary="Введите адрес сервера"
-			android:defaultValue="@string/xmppServer"
-			android:dialogTitle="Введите адрес сервера"/>	
-	</PreferenceCategory>
-	
- 
+	</PreferenceCategory> 
 </PreferenceScreen>

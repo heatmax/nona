@@ -14,6 +14,8 @@ public class CDBootCompleteRcv extends BroadcastReceiver {
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		//инициализация приложения
+		
 		Log.i(TAG, "rcvd boot event, launching service");
 		//Запустить службу перехватывающую USSD запросы
 		//test2 без ussd

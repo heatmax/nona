@@ -1,13 +1,48 @@
 <PreferenceScreen
-		 xmlns:android="http://schemas.android.com/apk/res/android">
-	<CheckBoxPreference
-		 android:key="notif"
-		 android:summary="Enable notifications"
-		 android:title="Notifications">
-	</CheckBoxPreference>
-	<EditTextPreference
-		 android:key="address"
-		 android:summary="Address for notifications"
-		 android:title="Address">
-	</EditTextPreference>
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Параметры отправки СМС">
+         <EditTextPreference
+			android:key="@string/defaultDelayAutoSms"
+            android:title="Интервал между отсылкой"
+            android:defaultValue="60"
+            android:dialogTitle="Введите интервал (сек.)"/>
+		<EditTextPreference
+            android:key="@string/defaultCountSms"
+            android:title="Количество смс за раз"
+            android:defaultValue="5"
+            android:dialogTitle="Введите количество смс(шт.)"/>	
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Настройка номеров">			
+		<ListPreference
+			android:entries="@array/methodNumberGeneration"
+			android:entryValues="@array/methodNumberGeneration_values"
+			android:defaultValue="1"		
+			android:key="@string/methodListSms"
+			android:summary="Выберите из списка"
+			android:title="Источник номеров">
+		</ListPreference>
+		<PreferenceScreen
+			android:key="manualSmsNumber"
+			android:dependency="@string/methodListSms"
+			android:summary="Настройки ручного ввода номеров телефона"
+			android:title="Редактировать ручной ввод">
+			<CheckBoxPreference
+				android:key="@string/isRandomSmsManualNumber"
+				android:summary="Использовать номера  случайном порядке"
+				android:title="Случайно">
+			</CheckBoxPreference>
+			<CheckBoxPreference
+				android:key="@string/isRepeatSmsManualNumber"
+				android:defaultValue="true"		
+				android:summary="Использовать номера повторно"
+				android:title="Повтрять">
+			</CheckBoxPreference>
+			<EditTextPreference
+				android:key="@string/defaultSmsPrefix"
+				android:title="Номера дозвона"
+				android:summary="Ввод номеров дозвона через Enter"
+				android:defaultValue="@string/defaultSmsPrefix"
+				android:dialogTitle="Введите номера либо маски (Например 111, +38067ххххххх)"/>	
+		</PreferenceScreen>		
+	</PreferenceCategory>
 </PreferenceScreen>

@@ -11,6 +11,8 @@ public final class R {
     public static final class array {
         public static final int methodNumberGeneration=0x7f050000;
         public static final int methodNumberGeneration_values=0x7f050001;
+        public static final int methodSmsNumberGeneration=0x7f050002;
+        public static final int methodSmsNumberGeneration_values=0x7f050003;
     }
     public static final class attr {
     }
@@ -43,29 +45,36 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f060000;
-        public static final int defaultCallTime=0x7f060007;
-        public static final int defaultDelayAutoAnswer=0x7f060008;
-        public static final int defaultDelayAutoCall=0x7f060006;
+        public static final int defaultCallTime=0x7f060008;
+        public static final int defaultCountSms=0x7f06000b;
+        public static final int defaultDelayAutoAnswer=0x7f060009;
+        public static final int defaultDelayAutoCall=0x7f060007;
+        public static final int defaultDelayAutoSms=0x7f06000a;
         public static final int defaultPrefix=0x7f060005;
+        public static final int defaultSmsPrefix=0x7f060006;
         public static final int infoAutoAnswerOff=0x7f060004;
         public static final int infoAutoAnswerOn=0x7f060003;
         public static final int infoAutoCallOff=0x7f060002;
         public static final int infoAutoCallOn=0x7f060001;
-        public static final int isAutoAnswer=0x7f06000c;
-        public static final int isAutoCall=0x7f06000d;
-        public static final int isAutoConference=0x7f06000f;
-        public static final int isAutoEndCall=0x7f06000e;
-        public static final int isRandomManualNumber=0x7f06000a;
-        public static final int isRepeatManualNumber=0x7f06000b;
-        public static final int isXmppUseConnect=0x7f060014;
-        public static final int methodList=0x7f060009;
-        public static final int xmppLogin=0x7f060010;
-        public static final int xmppPass=0x7f060011;
-        public static final int xmppPort=0x7f060012;
-        public static final int xmppServer=0x7f060013;
+        public static final int isAutoAnswer=0x7f060012;
+        public static final int isAutoCall=0x7f060013;
+        public static final int isAutoConference=0x7f060015;
+        public static final int isAutoEndCall=0x7f060014;
+        public static final int isRandomManualNumber=0x7f060010;
+        public static final int isRandomSmsManualNumber=0x7f06000e;
+        public static final int isRepeatManualNumber=0x7f060011;
+        public static final int isRepeatSmsManualNumber=0x7f06000f;
+        public static final int isXmppUseConnect=0x7f06001a;
+        public static final int methodList=0x7f06000c;
+        public static final int methodListSms=0x7f06000d;
+        public static final int xmppLogin=0x7f060016;
+        public static final int xmppPass=0x7f060017;
+        public static final int xmppPort=0x7f060018;
+        public static final int xmppServer=0x7f060019;
     }
     public static final class xml {
-        public static final int prefcall=0x7f040000;
-        public static final int prefsms=0x7f040001;
+        public static final int pref=0x7f040000;
+        public static final int prefcall=0x7f040001;
+        public static final int prefsms=0x7f040002;
     }
 }

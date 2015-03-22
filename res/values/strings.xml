@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">MORO</string>
+	<string name="app_name">Nona</string>
 	<string name="infoAutoCallOn">Остановить</string>
 	<string name="infoAutoCallOff">Запустить</string>
 	<string name="infoAutoAnswerOn">Автоприем выкл.</string>	
 	<string name="infoAutoAnswerOff">Автоприем вкл.</string>	
+	
 	<string name="defaultPrefix">+38067xxxxxxx</string>
+	<string name="defaultSmsPrefix">+38050620xxxx</string>
+	
 	<string name="defaultDelayAutoCall">15</string>
 	<string name="defaultCallTime">9</string>
  	<string name="defaultDelayAutoAnswer">0</string>
+	
+	<string name="defaultDelayAutoSms">60</string>
+	<string name="defaultCountSms">5</string>
+	
 	<string name="methodList">methodList</string>
+	<string name="methodListSms">methodListSms</string>
+	
+	<string name="isRandomSmsManualNumber">randomManualNumber</string>
+	<string name="isRepeatSmsManualNumber">repeatManualNumber</string>	
+	
 	<string name="isRandomManualNumber">randomManualNumber</string>
 	<string name="isRepeatManualNumber">repeatManualNumber</string>	
+	
 	<string name="isAutoAnswer">isAutoAnswer</string>	
 	<string name="isAutoCall">isAutoCall</string>		
 	<string name="isAutoEndCall">isAutoCall</string>		
