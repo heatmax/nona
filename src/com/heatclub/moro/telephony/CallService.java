@@ -166,8 +166,8 @@ public class CallService extends Service {
 				}
 				call.setCallDuration(0);
 				call.setNumber(uri.getHost());
-				call.setMode(ID_MODE_CALL);				
-				call.run();
+			//	call.setMode(ID_MODE_CALL);				
+				call.Call();
 				ActionManager.sendReply(getBaseContext(), "Дозвон на номер "+uri.getHost()+" запущен");				
 			}			
 			else
@@ -180,8 +180,7 @@ public class CallService extends Service {
 					
 				}
 				commandSet(uri);
-				call.setMode(ID_MODE_CALL);
-				call.run();
+				call.Call();
 				ActionManager.sendReply(getBaseContext(), "Дозвон запущен");				
 				
 			}		
@@ -202,8 +201,8 @@ public class CallService extends Service {
 						ActionManager.sendReply(getBaseContext(), "ОШИБКА : Пустой список номеров");		
 						return;
 					}			
-					call.setMode(ID_MODE_CALL);
-					call.run();
+					
+					call.Call();
 					ActionManager.sendReply(getBaseContext(), "Автодозвон запущен");								
 				}
 			}		
@@ -217,8 +216,7 @@ public class CallService extends Service {
 					return;
 				}			
 				call.autoCallOn();
-				call.setMode(ID_MODE_CALL);
-				call.run();	
+				call.Call();	
 				ActionManager.sendReply(getBaseContext(), "Автодозвон запущен");								
 				
 			}
@@ -265,7 +263,7 @@ public class CallService extends Service {
 		//	отправка глобального ответа		
 			if((uri.getQueryParameter(PARAM_KEY_OK) != null) && this.isAutoCall){
 				call.autoCallOn();
-				call.run();
+				call.Call();
 				ActionManager.sendReply(getBaseContext(), "USSD OK");		
 			}
 				
@@ -286,8 +284,8 @@ public class CallService extends Service {
 			}			
 			
 	//		call.setNumber(uri.getHost());
-			call.setMode(ID_MODE_SMS);
-			call.run();					
+	//		call.setMode(ID_MODE_SMS);
+	//		sms.run();					
 			ActionManager.sendReply(getBaseContext(), "Отправка смс на номер "+uri.getHost()+" запущен");				
 			
 		}

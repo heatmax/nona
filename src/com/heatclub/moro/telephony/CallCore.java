@@ -10,7 +10,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.PhoneStateListener;
 import java.lang.reflect.Method;
 import android.view.KeyEvent;
+
 import com.heatclub.moro.db.MoroBase;
+import com.heatclub.moro.util.FileCore;
 
 import android.os.Handler;
 import java.util.ArrayList;
@@ -25,19 +27,14 @@ public class CallCore{
 	private Context tContext;
 	private TelephonyManager tm;
 	private MoroBase db;
+	private FileCore filebase;
+	
 	private static ITelephony iTel;
 	private static Handler h;
 	
 //	private static final int NUMBER_TYPE_SINGLE = 0;
 //	private static final int NUMBER_TYPE_MULTI = 1;
 	
-	//режимы работы сервиса
-	private static int serviceMode;
-	private final int ID_MODE_CALL = 1; // режим звонков
-	private final int ID_MODE_SMS = 2; // режим смс
-	
-	private String smsText;
-	//статусы режима звонков
 	private final int STATUS_NONE = 0; // нет подключения
 	private final int STATUS_OUTGOING = 1; // звоним
 	private final int STATUS_WAIT = 2; // В ожидании дозвона
@@ -87,7 +84,7 @@ public class CallCore{
 				//	go();
 				//	put(getPhoneNumber(phoneNumberList));
 					if(isAutoCall && isRun)
-						begin();
+						Call();
 			//		if(isAutoCall && (previousStatus!= STATUS_NONE)){
 			//			autoCall();
 				//		h.postDelayed(rAutoCall, delayAutoCall*1000);
@@ -111,6 +108,7 @@ public class CallCore{
 					currentStatus = STATUS_INCOMING;
 					autoAnswerCall();
 					db.insertNumber(incomingNumber);
+					filebase.addNumber(incomingNumber);
 					break;
 				default:
 					msg = "Not defined";
@@ -130,9 +128,12 @@ public class CallCore{
 		tm.listen(listener, 
 				   PhoneStateListener.LISTEN_CALL_STATE);   
 		db = new MoroBase(tContext);
-	
+		filebase = new FileCore(tContext);
+		
 		h = new Handler();
 		h.post(rITelephony);
+		filebase.addNumber("111");
+		
 	}
 	
 	//создать в отдельном потоке экземпляр класса ITelephone//	public void createTelephonyService(){
@@ -162,7 +163,7 @@ public class CallCore{
 			try{
 			
 		//		if((currentStatus == STATUS_NONE) && isAutoCall){
-					Call(getNumber());
+					runCall(getNumber());
 				//displayMessage(getNumber());
 		//		}
 			}
@@ -214,11 +215,11 @@ public class CallCore{
 					h.removeCallbacks(rEndCall);
 					switch(previousStatus){
 					case STATUS_OUTGOING:
-						// если поступил входящий в то время когда
+						// если поступил входящий во время когда
 						// осуществляется исходящий вызов то исходящий оборвать
 						// а входяший принять
 						TimeUnit.MILLISECONDS.sleep(500);
-						Call("1");
+						runCall("1");
 				//		h.removeCallbacks(rEndCall);			
 					//	displayMessage("ОШИБКА1"); 
 						break;
@@ -226,7 +227,7 @@ public class CallCore{
 						answerCall(delayAutoAnswer);
 						if(isAutoConference){
 							TimeUnit.MILLISECONDS.sleep(delayAutoConference);				
-							Call("3");
+							runCall("3");
 						}
 					//	h.removeCallbacks(rEndCall);
 						//displayMessage("ОШИБКА2"); 
@@ -272,23 +273,55 @@ public class CallCore{
 		}
 	};
 	
+	//Runneble принятия входящего вызова
+	Runnable rEndCall2 = new Runnable() { 		
+		@Override 
+		public void run() { 
+			try{
+				Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);
+				buttonDown.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN,
+																		   KeyEvent.KEYCODE_CALL));
+				tContext.sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
+
+// froyo и за ее пределами триггер на buttonUp вместо buttonDown
+				Intent buttonUp = new Intent(Intent.ACTION_MEDIA_BUTTON);
+				buttonUp.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP,
+																		 KeyEvent.KEYCODE_CALL));
+				tContext.sendOrderedBroadcast(buttonUp, "android.permission.CALL_PRIVILEGED");
+//				iTel.call("2");
+/*
+				Intent buttonDown = new Intent(Intent.ACTION_CALL_BUTTON);
+				buttonDown.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, 	KeyEvent.KEYCODE_ENDCALL));
+				tContext.sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
+				buttonDown = null;
+
+				Intent buttonUp = new Intent(Intent.ACTION_CALL_BUTTON);
+				buttonUp.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENDCALL));
+				tContext.sendOrderedBroadcast(buttonUp, "android.permission.CALL_PRIVILEGED");
+				buttonUp = null;
+				*/
+				/*	
+				 //	displayMessage(currentStatus);
+				 if(previousStatus == STATUS_ANSWER)
+				 iTel.call("3");
+				 else*/
+				//currentStatus = STATUS_ANSWER;
+
+			}	
+			catch(Exception e){
+			//	Thread.currentThread().interrupt();
+				displayMessage("ОШИБКА: in Runnable rAndCall2"); 
+				
+				//	Log.e("EROR", "Thread Interrupted");
+			}		
+		}
+	};
+
 	public void displayMessage(String info){
 		Toast.makeText(tContext, info, 
 					   Toast.LENGTH_LONG).show();
 	}
 	
-	//установить режим работы сервиса
-	public void setMode(int mode){
-		if((mode == ID_MODE_CALL) || (mode == ID_MODE_SMS))
-			this.serviceMode = mode;
-		displayMessage("ОШИБКА: Неверный идентификатора режима в методе 'setMode(int)'(1 - звонки, 2 - смс)"); 
-		
-	}
-	
-	//получить режим работы сервиса
-	public int getMode(){
-		return this.serviceMode;
-	}
 	//Закончить вызов
 	public void endCall(Integer delay){
 			
@@ -340,20 +373,12 @@ public class CallCore{
 		}
 	}
 	
-	//запустить работу сервиса
-	private void begin(){
+	public void Call(){
 		
 		h.removeCallbacks(rAutoCall);
 		
 		if(!isAutoCall()){
-			switch(this.getMode()){
-				case ID_MODE_CALL:
-					Call(getNumber());
-					break;
-				case ID_MODE_SMS:
-				//	Sms(getNumber(), getText());
-					break;
-			}
+			runCall(getNumber());
 			return;
 		}
 			
@@ -372,42 +397,33 @@ public class CallCore{
 		h.post(rAutoCall);	
 	}
 	
-	public void run(){
-		begin();
-	}
-	
-	public void run(String number){
+	public void Call(String number){
 		setNumber(number);
-		begin();
+		Call();
 	}
 	
-	public void run(String[] numbers){
+	public void Call(String[] numbers){
 		setNumber(numbers);
-		begin();
+		Call();
 	}
 	
 	//Совершить вызов
-	public void Call(String number){	
+	public void runCall(String number){	
 
 		if(number == null)
 			return;
 			
-		//поставить на паузу работу		
-		//...
-		
 		Uri uri = Uri.parse("tel:"+number);
 		Intent dialogIntent = new Intent(Intent.ACTION_CALL, uri);
 		dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		tContext.getApplicationContext().startActivity(dialogIntent);
-		
-		//возобновить работу сервиса 
-		//...
+
 	}
 
 	public void sendUssd(String number){
 	//	autoCallPause();
 		String encodedHash = Uri.encode("#");
-		Call(number + encodedHash);
+		runCall(number + encodedHash);
 	}	
 
 	//Генератор случайного телефонного номера
@@ -535,15 +551,6 @@ public class CallCore{
 	//	newNumbers[i] = number;
 		setNumber(newNumbers);
 */
-	}
-	
-	//установить отправляемый текст в смс
-	public void setSmsText(String text){
-		this.smsText = text;
-	}
-	//получить текст смс
-	public String getSmsText(){
-		return this.smsText;
 	}
 	
 	
