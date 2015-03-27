@@ -9,6 +9,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,6 +21,10 @@ import android.view.View;
 import android.content.Context;
 
 import com.heatclub.moro.action.ActionManager;
+import java.io.*;
+import org.jivesoftware.smack.*;
+import java.lang.reflect.*;
+import java.util.*;
 
 
 public class FileCore
@@ -31,58 +38,97 @@ public class FileCore
 	}
 	
 	public void addNumber(String number){
-		writeFile();
+		String dir = "/sdcard/nona";
+		
+		List<String> list= openFileAsList(dir+"/"+getFilename());
+//		list.
+	//	saveFile(dir, number);
 	}
 	
-	private void writeFile() {
-		String DIR_SD = "nona/";
-		String FILENAME_SD = "test.txt";
-		// проверяем доступность SD
-		if (!Environment.getExternalStorageState().equals(
-				Environment.MEDIA_MOUNTED)) {
-			//Log.d(LOG_TAG, "SD-карта не доступна: " + Environment.getExternalStorageState());
-			return;
-		}
-		// получаем путь к SD
-		File sdPath = Environment.getExternalStorageDirectory();
-		// добавляем свой каталог к пути
+	// Метод для открытия файла
+    private List openFileAsList(String fileName) {
+        try {
+            FileInputStream inputStream = new FileInputStream(fileName);
+			List<String> list = new ArrayList<String>();
+			
+            if (inputStream != null) {
+                InputStreamReader isr = new InputStreamReader(inputStream);
+                BufferedReader reader = new BufferedReader(isr);
+                String line;
+           //     StringBuilder builder = new StringBuilder();
+			
+                while ((line = reader.readLine()) != null) {
+                    list.add(line);
+                }
 
-		//sdPath = new File(DIR_SD);
-		// создаем каталог
-	//	sdPath.mkdirs();
-		// формируем объект File, который содержит путь к файлу
-		File sdFile = new File(sdPath, DIR_SD+FILENAME_SD);
-		try {
-			// открываем поток для записи
-			BufferedWriter bw = new BufferedWriter(new FileWriter(sdFile));
-			// пишем данные
-			bw.write("Содержимое файла на SD");
-			// закрываем поток
-			bw.close();
-			//Log.d(LOG_TAG, "Файл записан на SD: " + sdFile.getAbsolutePath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	
-		ActionManager.sendReply(tContext, "запись в файл ОК "+sdPath.getAbsolutePath());
-	}
-/*	
-	private void writeFile2() {
-    try {
-	  String FILENAME = "/storage/sdcard0/nona/tm.txt";
-      // отрываем поток для записи
-      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-          openFileOutput(FILENAME, MODE_PRIVATE)));
-      // пишем данные
-      bw.write("Содержимое файла");
-      // закрываем поток
-      bw.close();
-     // Log.d(LOG_TAG, "Файл записан");
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
+                inputStream.close();
+				ActionManager.sendReply(tContext, "Содержимое файла : "+list.toString());
+				return list;
+               // mEditText.setText(builder.toString());
+            }
+        } catch (Throwable t) {
+          	ActionManager.sendReply(tContext,
+									"Exception: " + t.toString());
+			return null;
+        }
+		
+		return null;
     }
-  }
-  */
+
+	
+	// Метод для открытия файла
+    private StringBuilder openFile(String fileName) {
+        try {
+            FileInputStream inputStream = new FileInputStream(fileName);
+
+            if (inputStream != null) {
+                InputStreamReader isr = new InputStreamReader(inputStream);
+                BufferedReader reader = new BufferedReader(isr);
+                String line;
+                StringBuilder builder = new StringBuilder();
+
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line + "\n");
+                }
+
+                inputStream.close();
+				ActionManager.sendReply(tContext, "Содержимое файла : "+builder.toString());
+				return builder;
+				// mEditText.setText(builder.toString());
+            }
+        } catch (Throwable t) {
+          	ActionManager.sendReply(tContext,
+									"Exception: " + t.toString());
+			return null;
+        }
+
+		return null;
+    }
+	
+    // Метод для сохранения файла
+    private void saveFile(String dirpath, String text) {
+        try {
+			
+			File dir = new File(dirpath);
+			if (!dir.exists())
+				dir.mkdirs();
+				
+			File file = new File(dirpath+"/"+getFilename());
+			FileOutputStream fos = new FileOutputStream(file);
+			fos.write(text.getBytes());
+			fos.close();
+			
+			ActionManager.sendReply(tContext, "Запись в файл успешна");
+			
+        } catch (Throwable t) {
+          	ActionManager.sendReply(tContext,
+				"Exception: " + t.toString());
+        }
+    }
+	
+	private String getFilename(){
+		return this.filename;
+	}	
 }
+
+

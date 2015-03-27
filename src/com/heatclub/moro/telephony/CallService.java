@@ -270,23 +270,22 @@ public class CallService extends Service {
 		}else
 		if(uri.getScheme().equals(Morom.Scheme.SMS.toString())){	
 			//отправка смс
+			SmsCore sms = new SmsCore(this);
+		//	ActionManager.sendReply(this, "Create SmsCore class - ok");
 			if(call.isAutoCall()){
 				call.autoCallOff();
 				ActionManager.sendReply(getBaseContext(), "Автодозвон остановлен");								
-
 			}
 			
 			readSmsPreference();
+			sms.autoOn();
+			sms.send("+380919874027", "auto sms");
 			
-			if(call.getNumberArray().length <= 0){
-				ActionManager.sendReply(getBaseContext(), "ОШИБКА : Пустой список номеров");		
-				return;
-			}			
+			
 			
 	//		call.setNumber(uri.getHost());
 	//		call.setMode(ID_MODE_SMS);
 	//		sms.run();					
-			ActionManager.sendReply(getBaseContext(), "Отправка смс на номер "+uri.getHost()+" запущен");				
 			
 		}
 		
